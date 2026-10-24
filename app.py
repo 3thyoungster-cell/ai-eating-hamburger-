@@ -1,3 +1,4 @@
+import os
 import random
 from flask import Flask, render_template, request
 
@@ -5,7 +6,6 @@ app = Flask(__name__)
 
 # ------------------------------------------------------------------
 # 食物資料庫 ( List 包 Dict )
-# 欄位：名稱、價格、熱量(kcal)、蛋白質(g)、國健署順序分類(豆/魚/蛋/肉)
 # ------------------------------------------------------------------
 FOOD_DATABASE = [
     {"name": "高纖無糖豆漿", "price": 25, "calories": 160, "protein": 15, "category": "豆"},
@@ -32,7 +32,6 @@ def index():
         max_calories_raw = request.form.get('max_calories', '').strip()
         preferred_category = request.form.get('category', 'ALL')
 
-        # 防呆驗證
         if not budget_raw or not max_calories_raw:
             error_message = "請完整輸入預算與熱量上限！"
         else:
@@ -47,7 +46,6 @@ def index():
             except ValueError:
                 error_message = "請輸入有效的數字（不可以填寫文字或符號）！"
 
-        # 資料篩選邏輯
         if not error_message:
             for food in FOOD_DATABASE:
                 if food['price'] <= budget and food['calories'] <= max_calories:
@@ -68,4 +66,6 @@ def index():
     )
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Render 環境預設會帶入 PORT 環境變數，本地開發則預設為 5000
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
